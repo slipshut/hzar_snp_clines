@@ -1,0 +1,19 @@
+#!/bin/bash
+#SBATCH --qos=long
+#SBATCH --time=7-0
+#SBATCH --verbose    ###        Verbosity logs error information into the error file
+#SBATCH --job-name=snp_cull_hz.1 ### Job Name
+#SBATCH --nodes=1             ### Node count required for the job
+#SBATCH --ntasks-per-node=20   ### Number of tasks to be launched per Node
+#SBATCH --output=snp_cull_hz.1.out
+#SBATCH --error=snp_cull_hz.1.error.err
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=slipshut@tulane.edu
+
+date
+pwd
+
+module load R
+Rscript Jac_SNP_cull_freq_hz.R
+
+date
