@@ -1,7 +1,7 @@
 ## Builiding SNP frequency per locality
 #setwd("~/Dropbox/Jacanas/GBS_processing/Formating_Scripts/Diagnostic_loci")
 library(foreach)
-snp.data <- read.csv("table_39.old.csv")
+snp.data <- read.csv("table_38.old.csv")
 ind.data <- read.csv("Jacana_251ind_info.csv")
 
 #snp.data[1:10, 1:10]
@@ -53,9 +53,9 @@ snp.freq.cull<-
 #write out file in pieces
 for(chunk in seq(0,ncol(snp.freq.cull)/2-255,by = 250)){
 	snp.chunk = snp.freq.cull[,chunk*2+(1:500)]
-	write.csv(snp.chunk,file = sprintf("table_cull_hz_%06i.csv",chunk+6000*39))
+	write.csv(snp.chunk,file = sprintf("table_cull_hz_%06i.csv",chunk+6000*38))
 }
 
 chunk = chunk + 250
 snp.chunk = snp.freq.cull[,(chunk*2+1):ncol(snp.freq.cull)]
-write.csv(snp.chunk,file = sprintf("table_cull_hz_%06i.csv",chunk+6000*39))
+write.csv(snp.chunk,file = sprintf("table_cull_hz_%06i.csv",chunk+6000*38))

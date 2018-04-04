@@ -1,7 +1,10 @@
 ## Builiding SNP frequency per locality
 #setwd("~/Dropbox/Jacanas/GBS_processing/Formating_Scripts/Diagnostic_loci")
 library(foreach)
-snp.data <- read.csv("table_39.old.csv")
+library(iterators)
+
+for( iter_chunk in 0:37 ){
+snp.data <- read.csv(paste0("table_",iter_chunk,".old.csv"))
 ind.data <- read.csv("Jacana_251ind_info.csv")
 
 #snp.data[1:10, 1:10]
@@ -27,7 +30,6 @@ snp.freq <- foreach(snp.col=colnames(snp.data)[seq(3,ncol(snp.data),2)], .combin
 #    Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
 #       2  3723000  7421000  7414000 11090000 14800000 
 
-library(iterators)
 #foreach(val=iter(col,by = c("row") ),.combine=rbind ) %:%
 
 #foreach(col=iter(as.matrix(snp.freq),by = c("column") ),.combine=cbind  ) %:% 
@@ -53,9 +55,10 @@ snp.freq.cull<-
 #write out file in pieces
 for(chunk in seq(0,ncol(snp.freq.cull)/2-255,by = 250)){
 	snp.chunk = snp.freq.cull[,chunk*2+(1:500)]
-	write.csv(snp.chunk,file = sprintf("table_cull_hz_%06i.csv",chunk+6000*39))
+	write.csv(snp.chunk,file = sprintf("table_cull_hz_%06i.csv",chunk+6000*iter_chunk))
 }
 
 chunk = chunk + 250
 snp.chunk = snp.freq.cull[,(chunk*2+1):ncol(snp.freq.cull)]
-write.csv(snp.chunk,file = sprintf("table_cull_hz_%06i.csv",chunk+6000*39))
+write.csv(snp.chunk,file = sprintf("table_cull_hz_%06i.csv",chunk+6000*iter_chunk))
+}
