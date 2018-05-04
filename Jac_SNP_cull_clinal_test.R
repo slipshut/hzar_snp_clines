@@ -40,4 +40,6 @@ return(character())
 
 if(FALSE){
   cull.allele(use.allele,read_cull_table(use.table))
+  table_to_cull=read_cull_table(use.table)
+  allele_list=colnames(table_to_cull)[seq(4,ncol(table_to_cull),by=2)]
 }
