@@ -2,11 +2,19 @@
 source("HZAR_MLE.R")
 library(hzar)
 
-table_cull_hz_hwe <- read.csv("table_cull_hz_hwe_128000.csv",row.names=1)
-locality_info <- read.table("locality_info.txt",header=TRUE)
-str(table_cull_hz_hwe)
+#table_cull_hz_hwe <- read.csv("table_cull_hz_hwe_128000.csv",row.names=1)
+#locality_info <- read.table("locality_info.txt",header=TRUE)
+#str(table_cull_hz_hwe)
+#table_to_cull <- cbind(locality_info,table_cull_hz_hwe[as.character(locality_info$Name),])
 
-use.allele="S1_991670203_T"
+use.allele="S1_601371118_G"
+use.table="table_cull_hz_hwe_128000.csv"
+read_cull_table <- function(filename){
+  table_cull_hz_hwe <- read.csv(filename,row.names=1)
+  locality_info <- read.table("locality_info.txt",header=TRUE)
+  table_to_cull <- cbind(locality_info,table_cull_hz_hwe[as.character(locality_info$Name),])
+  return(table_to_cull)
+}
 
 cull.allele <- function(use.allele,table_cull_hz_hwe) {
   
@@ -28,4 +36,8 @@ MLE.AIC=sapply(MLE,hzar.AICc.hzar.cline,nObs=sum(obs$frame$n))
 
 if (any(null.AIC > 2 + MLE.AIC)) return(use.allele)
 return(character())
+}
+
+if(FALSE){
+  cull.allele(use.allele,read_cull_table(use.table))
 }
