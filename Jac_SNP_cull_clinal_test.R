@@ -39,7 +39,12 @@ return(character())
 }
 
 if(FALSE){
-  cull.allele(use.allele,read_cull_table(use.table))
+  #cull.allele(use.allele,read_cull_table(use.table))
   table_to_cull=read_cull_table(use.table)
   allele_list=colnames(table_to_cull)[seq(4,ncol(table_to_cull),by=2)]
+  library(doParallel)
+  registerDoParallel(2)
+  clinal_snps =foreach(use.allele=allele_list,.combine = c)%dopar%{
+    cull.allele(use.allele,table_to_cull)
+  }
 }
