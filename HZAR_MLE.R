@@ -1,4 +1,6 @@
 ## Estimate the Maximum Likelihood parameters for a given compiled model
+library(subplex)
+
 cline.getMLE <- function(fitR, nFits=30,doPar=FALSE){
   mP <- fitR$modelParam
   resF <- subplex(mP$init,
