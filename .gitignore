@@ -1,3 +1,6 @@
 .Rproj.user
 .Rhistory
 .RData
+table_cull*.csv
+table_cull*.RData
+/MLE_cache/
