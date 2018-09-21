@@ -251,6 +251,8 @@ write.csv(snp_cw, file = "Jac_SNP_fixed_hwe_center_width.csv")
   snp_cw <- read.csv("Jac_SNP_fixed_hwe_center_width.csv", row.names = TRUE)
 }
 
+dim(snp_cw) # 8479 this confirms we have 8479 fixed snps
+
 library(lattice)
 summary(snp_cw)
 histogram(~center, data = snp_cw, nint = 501, xlim=c(400,700), col = "light grey", border = "dark grey", panel = function(...) { panel.histogram(...); 
