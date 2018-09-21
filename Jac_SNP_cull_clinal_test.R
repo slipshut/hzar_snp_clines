@@ -258,7 +258,7 @@ histogram(~center, data = snp_cw, nint = 501, xlim=c(400,700), col = "light grey
   panel.abline(v=c(550.9,672.9),lwd=1,col="purple", lty = "dashed"); 
   panel.abline(v=483.2,lwd=1,col="black");
   panel.abline(v=c(479.2,489.3),lwd=1,col="black", lty="dashed");
-  panel.abline(v=488.8, lwd = 1, col = "red")})
+  panel.abline(v=490.1, lwd = 1, col = "red")})
 
 densityplot(~center, data = snp_cw, plot.points = FALSE, xlim=c(450,690), lwd = 2, col = "dark grey", panel = function(...) { 
   panel.abline(v=611,lwd=1,col="purple"); 
@@ -266,7 +266,7 @@ densityplot(~center, data = snp_cw, plot.points = FALSE, xlim=c(450,690), lwd = 
   panel.abline(v=483.2,lwd=1,col="black");
   panel.abline(v=c(479.2,489.3),lwd=1,col="black", lty="dashed"); 
   panel.densityplot(...); 
-  panel.abline(v=488.8, lwd = 1, col = "red")})
+  panel.abline(v=490.1, lwd = 1, col = "red")})
 
 histogram(~width, data = snp_cw, panel = function(...) { panel.histogram(...); 
   panel.abline(v=288.5,lwd=2,col="purple"); 
@@ -289,8 +289,8 @@ densityplot(~log(width), data = snp_cw, plot.points = FALSE, xlim = c(-2,7), lwd
   panel.densityplot(...); })
 
 library(moments)
-skewness(snp_cw$center) # -6.611901 indicates data is skewed to the left, or negatively skewed
-kurtosis(snp_cw$center) # 241.4681 # leptokurtic - fat-tailed distribution
+skewness(snp_cw$center) # -17.39349 indicates data is skewed to the left, or negatively skewed
+kurtosis(snp_cw$center) # 742.7753 'excess' # leptokurtic - fat-tailed distribution
 
 skewness(snp_cw$width) # 20.5004 indicates data is skewed to the right, or positively skewed
 kurtosis(snp_cw$width) # 596.3487
@@ -298,4 +298,27 @@ kurtosis(snp_cw$width) # 596.3487
 qqnorm(snp_cw$center) # data have more extreme values than would be expected if they truly came from a Normal distribution
   # spike of identical values, heavy tailed
 
-qqline(snp_cw$center)
+qqnorm(log(snp_cw$width)) # right skewed without log transformation, fat tailed with log transformation
+
+quantile(snp_cw$center, probs=c(0.005,0.995)) # 99% of centers fall within this range
+  # 0.5%    99.5% 
+#477.0501 542.0634 
+
+skewness(subset(snp_cw, center >= 477.0501 & center <= 542.0634)$center) # 2.365532
+  # cut out fat tails to see skewness - cutting out most extreme 1% from both left and right side
+kurtosis(subset(snp_cw, center >= 477.0501 & center <= 542.0634)$center) # 12.20143
+qqnorm(subset(snp_cw, center >= 477.0501 & center <= 542.0634)$center) # right skewed
+
+quantile(snp_cw$width, probs=c(0.005,0.995)) # 99% of centers fall within this range
+  #     0.5%      99.5% 
+  # 5.340858 596.137057
+skewness(subset(snp_cw, width >= 5.340858 & width <= 596.137057)$width) # 7.595443
+  # cut out fat tails to see skewness - cutting out most extreme 1% from both left and right side
+kurtosis(subset(snp_cw, width >= 5.340858 & width <= 596.137057)$width) # 102.5963
+qqnorm(subset(snp_cw, width >= 5.340858 & width <= 596.137057)$width) # right skewed
+
+skewness(subset(snp_cw, center >= 477.0501 & center <= 542.0634)$width) # 31.22437
+# cut out fat tails to see skewness - cutting out most extreme 1% from both left and right side
+kurtosis(subset(snp_cw, center >= 477.0501 & center <= 542.0634)$width) # 1191.364
+qqnorm(subset(snp_cw, center >= 477.0501 & center <= 542.0634)$width) # right skewed
+qqnorm(log(subset(snp_cw, center >= 477.0501 & center <= 542.0634)$width)) # fat tailed
