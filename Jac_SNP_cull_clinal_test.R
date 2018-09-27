@@ -104,7 +104,8 @@ if(!is.null(MLE.file)){
 }
 return(character())
 }
-cull.allele.clinal <- function(use.allele,table_cull_hz_hwe, plot=F, add = F,MLE.file=NULL,plot.args=list()) {
+cull.allele.clinal <- function(use.allele,table_cull_hz_hwe, plot=F, add = F,MLE.file=NULL,
+                               plot.args=list(), save.plot=F) {
   
   use.count=sub(pattern="[ACTG]$",replacement="N",x=use.allele)
   
@@ -117,16 +118,19 @@ cull.allele.clinal <- function(use.allele,table_cull_hz_hwe, plot=F, add = F,MLE
     sel.MLE<-NULL
     if(file.exists(output_file<-paste0(MLE.file,"_",use.allele,".RData"))){
       load(file = output_file)
+      if(is.null(sel.MLE) && save.plot) return(list())
       if(is.null(sel.MLE) ) return(character(0))
       #if(plot) {
         if(sel.MLE$param.all$pMax >0.9 && sel.MLE$param.all$pMin < 0.1){
           if (mean(obs$frame$dist) < (sum(obs$frame$dist * 
                                           obs$frame$obsFreq)/sum(obs$frame$obsFreq)))
             body(sel.MLE$clineFunc) <- bquote(1-.(body(sel.MLE$clineFunc)))
+          if(save.plot) return(list(sel.MLE$clineFunc))
           if(plot)
             do.call(hzar.plot.cline,c(list(sel.MLE,add=add),plot.args))
           return(use.allele)
         }
+      if(save.plot) return(list())
       return(character(0))
       #}
       #return(use.allele)
@@ -188,7 +192,7 @@ cull.table <- function(use.table,plot=T, add=F, save.MLE=T, plot.args=list()){
 }
 
 
-cull.hwe.table <- function(use.table,plot=T, add=F, save.MLE=T, plot.args=list()){
+cull.hwe.table <- function(use.table,plot=T, add=F, save.MLE=T, plot.args=list(), save.plot = F){
   #cull.allele(use.allele,read_cull_table(use.table))
   output_table=sub( x= use.table,pattern="(_[0-9]*\\.csv$)", replacement = "_clinal\\1")
   if(save.MLE)
@@ -204,7 +208,11 @@ cull.hwe.table <- function(use.table,plot=T, add=F, save.MLE=T, plot.args=list()
     table_to_cull=read_cull_table(use.table)
     allele_list=colnames(table_to_cull)[seq(4,ncol(table_to_cull),by=2)]
   }
-  if(plot){
+  if(save.plot){
+    clinal_snps =foreach(use.allele=allele_list,.combine = c)%dopar%{
+      cull.allele.clinal(use.allele,table_to_cull,plot=F,add=T,save.plot=T,MLE.file=output_rdata,plot.args=plot.args)
+    }
+  }else if(plot){
     if(!add)
       allele.plot(allele_list[1],table_to_cull, col="transparent")
     clinal_snps =foreach(use.allele=allele_list,.combine = c)%do%{
@@ -223,6 +231,25 @@ cull.hwe.table <- function(use.table,plot=T, add=F, save.MLE=T, plot.args=list()
   #write.csv(table_to_cull[,c(col.list)],file = output_table)
   return(clinal_snps)
 }
+
+# setup plot for clines
+setup_cline_plot <- function(...){
+  table_cull_hz_hwe<- structure(list(locationID = structure(c(1L, 2L, 3L, 24L, 25L), 
+                                                        .Label = c("A","B", "C", "D", "E", "F", "G", "I", "J", "K", "L", "M", "N", "O", 
+                                                                                             "P", "Q", "R", "S", "U", "W", "X", "Y", "ZC", "ZD", "ZG"), class = "factor"), 
+                                  distance = c(0, 298.1482087, 307.3896796, 672.2232788, 840.8756274
+                                  ), 
+                                 S1_1070531337_C = c(0.05, 
+                                                     0.0625, 0, 1, 0.884615384615385), S1_1070531337_N = c(20L,16L, 2L, 2L, 26L)), .Names = c("locationID", "distance", "S1_1070531337_C", "S1_1070531337_N"), 
+                            row.names = c("Palo_Verde", 
+                                          "La_Gamba", "Changuinola", "Tocumen", "Aruza_Abajo"), class = "data.frame")
+  obs=hzar.doMolecularData1DPops(table_cull_hz_hwe$distance,
+                                 pObs = table_cull_hz_hwe$S1_1070531337_C,
+                                 nEff = table_cull_hz_hwe$S1_1070531337_N,
+                                 siteID = table_cull_hz_hwe$locationID)
+  hzar.plot.obsData(obs,col="transparent",...)
+}
+
 
 # Get cline centers and widths from output
 if(!file.exists("Jac_SNP_fixed_hwe_center_width.csv")){
@@ -243,6 +270,8 @@ get_snp_cw <- function(MLE_list){
   pattern	= "MLE_cache/table_cull_hz_hwe_clinal_......_S1_([0-9]+)_..RData"))
     }}
  
+
+# Distribution of cline centers
 #print(head(snp_cw <- get_snp_cw(sample(MLE_list, 100))))
 print(head(snp_cw <- get_snp_cw(MLE_list)))
 
@@ -250,7 +279,7 @@ write.csv(snp_cw, file = "Jac_SNP_fixed_hwe_center_width.csv")
 } else{
   snp_cw <- read.csv("Jac_SNP_fixed_hwe_center_width.csv", row.names = TRUE)
 }
-
+if(FALSE){
 dim(snp_cw) # 8479 this confirms we have 8479 fixed snps
 
 library(lattice)
@@ -324,3 +353,4 @@ skewness(subset(snp_cw, center >= 477.0501 & center <= 542.0634)$width) # 31.224
 kurtosis(subset(snp_cw, center >= 477.0501 & center <= 542.0634)$width) # 1191.364
 qqnorm(subset(snp_cw, center >= 477.0501 & center <= 542.0634)$width) # right skewed
 qqnorm(log(subset(snp_cw, center >= 477.0501 & center <= 542.0634)$width)) # fat tailed
+}
